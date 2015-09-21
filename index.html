@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html ng-app="myApp">
+<head>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+    <meta charset="UTF-8" />
+    <title>TrueCar</title>
+    <script data-require="angular.js@1.3.x" src="https://code.angularjs.org/1.3.16/angular.js" data-semver="1.3.16"></script>
+    <script data-require="jquery@2.1.3" data-semver="2.1.3" src="http://code.jquery.com/jquery-2.1.3.min.js"></script>
+    <script src="script.js"></script>
+    <script type="text/javascript" src="http://demos.amitavroy.com/learningci/assets/js/xml2json.js" charset="UTF-8"></script>
+    <script>
+        var app = angular.module('myApp', []);
+        app.controller('myctrl', function($timeout,$scope,$http) {
+            $(document).ready(function(){
+                var index = $("#sortable li").length;
+                $('#add').click(function() {
+                    index = index + 1;
+                    var value= $("#name").val();
+                    var $li = $('<li>'+value+' <a>Delete</a></li>');
+                    var theId =  (index);
+                    $li.attr("id", theId);
+                    $li.click(function(){
+                        $scope.remove(theId-1);
+                    });
+                    $('#sortable').append($li);
+                });
+
+                $("#sortable").delegate("li", "click", function(){
+                    $(this).remove();
+                });
+            });
+            var persons=[];
+            var count=0;
+            $http.get('person.json').success(function(data){
+                var person_json = data.person;
+                $scope.person_json=person_json;
+                PersonsPush($scope.person_json);
+            });
+            function PersonsPush(person){
+                var numOfPersons = person.length;
+                for (var i = 0; i < numOfPersons; i++) {
+                    persons.push({
+                        Name: person[i].Name
+                    });
+                }
+            }
+            $scope.add=function(){
+                var len=persons.length;
+                var value= $("#name").val();
+                persons.push({
+                    Name:value
+                });
+            }
+            $scope.remove=function(a){
+                var value=persons.length;
+                if(a>=value)
+                {
+                    a=a-count+1;
+                }
+                persons.splice(a,1);
+                count++;
+            }
+            $scope.persons=persons;
+        });
+    </script>
+    <style>
+        #Test{
+            float: left;
+            width:50%;
+        }
+        a{
+            color:blue;
+        }
+    </style>
+</head>
+<body ng-controller="myctrl">
+<div id="Test">
+    <label>Add Item: </label>
+    <input type="text" id="name"/>
+    <input type="button" value="add" id="add" ng-click="add()"/>
+</div>
+<div id="Test">
+    <ol id="sortable">
+        <li id="1" ng-click="remove(0)">Item 1 <a>Delete</a></li>
+        <li id="2" ng-click="remove(1)">Item 2 <a>Delete</a></li>
+        <li id="3" ng-click="remove(2)">Item 3 <a>Delete</a></li>
+    </ol>
+</div>
+{{persons}}
+</body>
+</html>
